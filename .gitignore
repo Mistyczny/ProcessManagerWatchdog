@@ -1,0 +1,7 @@
+**/logs
+*.o
+*.log
+.idea/
+build/
+sourceOutput/
+.vscode/

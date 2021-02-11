@@ -1,0 +1,11 @@
+project(ProcessManagerWatchdogTests)
+
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/testsOutput)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/testsOutput)
+
+add_subdirectory(MongoDatabaseTests)
+add_subdirectory(WatchdogModulesRequestHandlersTests)
+add_subdirectory(WatchdogServicesRequestHandlersTests)
+
+add_library(catchTestMain STATIC CatchTestsMain.cpp)
+target_link_libraries(catchTestMain PUBLIC Catch2::Catch2)

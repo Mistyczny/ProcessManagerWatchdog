@@ -1,0 +1,12 @@
+[Unit]
+Description="Process Manager main service"
+After=mongod.service
+
+[Service]
+Type=simple
+Restart=on-failure
+WorkingDirectory=/opt/ProcessManager/
+ExecStart=/opt/ProcessManager/Watchdog
+
+[Install]
+WantedBy=multi-user.target
