@@ -20,3 +20,6 @@ target_include_directories(Watchdog PRIVATE
         ${MongoCxxIncludes}
         ${BOOST_ROOT}
         ${CMAKE_BINARY_DIR}/Protocols)
+
+install(TARGETS Watchdog DESTINATION /opt/ProcessManager/)
+install(FILES ${CMAKE_SOURCE_DIR}/Source/src/Watchdog.service DESTINATION /etc/systemd/system)

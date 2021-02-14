@@ -4,7 +4,6 @@
 
 namespace Watchdog {
 
-constexpr size_t PingSendingIntervalInMilliseconds = 7000;
 constexpr size_t PingTimerExpirationIntervalInMilliseconds = 8000;
 
 ModuleConnection::ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& mCollection)

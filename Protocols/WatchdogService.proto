@@ -24,9 +24,16 @@ enum ResponseCode {
   Unknown = 4;
 }
 
+enum ConnectionState {
+  Registered = 0;
+  Connected = 1;
+  Disconnected = 2;
+}
+
 message ConnectResponseData {
   required ResponseCode responseCode = 1 [default = Unknown];
   optional uint32 sequenceCode = 2;
+  optional ConnectionState connectionState = 3;
 }
 
 message PingRequestData {
@@ -44,6 +51,7 @@ message ReconnectRequestData {
 message ReconnectResponseData {
   required ResponseCode responseCode = 1 [default = Unknown];
   optional uint32 sequenceCode = 2;
+  optional ConnectionState connectionState = 3;
 }
 
 message ShutdownRequestData {
