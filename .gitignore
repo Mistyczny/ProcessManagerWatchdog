@@ -5,3 +5,5 @@
 build/
 sourceOutput/
 .vscode/
+bin/
+cmake-build-debug/
