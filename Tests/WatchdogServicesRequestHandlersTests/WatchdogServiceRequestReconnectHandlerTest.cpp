@@ -10,7 +10,7 @@ private:
 
 public:
     MongoDbConnection() {
-        if (!Mongo::DbEnvironment::initialize("127.0.0.1")) {
+        if (!Mongo::DbEnvironment::initialize()) {
             throw std::runtime_error("Failed to initialize connection with mongodb");
         } else if (!Mongo::DbEnvironment::isConnected()) {
             throw std::runtime_error("Not connected with mongodb");

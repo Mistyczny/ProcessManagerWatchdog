@@ -11,7 +11,7 @@ private:
 
 public:
     MongoDbConnection() {
-        Mongo::DbEnvironment::initialize("127.0.0.1");
+        Mongo::DbEnvironment::initialize();
         auto modulesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
         modulesCollection = std::make_unique<Mongo::ModulesCollection>(*modulesCollectionEntry, "ModulesTest");
         modulesCollection->drop();
@@ -37,7 +37,7 @@ TEST_CASE_METHOD(MongoDbConnection, "Testing watchdog reconnect functionality", 
     SECTION("Parsing invalid message") {
         std::string invalidMessage{};
         Watchdog::ModuleReconnectRequestHandler reconnectHandler{authenticationData, modulesCollection, setTimer};
-        REQUIRE_THROWS_AS( reconnectHandler.createResponse(invalidMessage),  Watchdog::ModuleRequestHandlerException);
+        REQUIRE_THROWS_AS(reconnectHandler.createResponse(invalidMessage), Watchdog::ModuleRequestHandlerException);
     }
 
     SECTION("Module doesnt exists in database") {

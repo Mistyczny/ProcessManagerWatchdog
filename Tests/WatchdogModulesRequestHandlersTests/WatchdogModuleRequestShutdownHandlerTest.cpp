@@ -11,7 +11,7 @@ private:
 
 public:
     MongoDbConnection() {
-        Mongo::DbEnvironment::initialize("127.0.0.1");
+        Mongo::DbEnvironment::initialize();
         auto modulesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
         modulesCollection = std::make_unique<Mongo::ModulesCollection>(*modulesCollectionEntry, "ModulesTest");
         modulesCollection->drop();

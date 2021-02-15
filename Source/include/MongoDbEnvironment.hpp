@@ -19,7 +19,7 @@ private:
 public:
     DbEnvironment(std::string address);
     ~DbEnvironment() = default;
-    static bool initialize(std::string address);
+    static bool initialize(std::string address = "mongodb://localhost:27017");
 
     static constexpr std::unique_ptr<DbEnvironment>& getInstance() { return instance; };
     mongocxx::pool::entry getClient();

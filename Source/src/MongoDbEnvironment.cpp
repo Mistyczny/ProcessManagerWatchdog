@@ -20,7 +20,7 @@ bool DbEnvironment::initialize(std::string address) {
     return isInitialized;
 }
 
-DbEnvironment::DbEnvironment(std::string address) : mongoInstance{}, clientsPool{mongocxx::uri{}} {}
+DbEnvironment::DbEnvironment(std::string address) : mongoInstance{}, clientsPool{mongocxx::uri{address}} {}
 
 mongocxx::pool::entry DbEnvironment::getClient() {
     auto entry = clientsPool.acquire();

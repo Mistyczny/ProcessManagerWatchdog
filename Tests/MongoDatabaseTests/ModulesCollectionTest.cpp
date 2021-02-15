@@ -4,7 +4,7 @@
 #include <catch2/catch.hpp>
 
 TEST_CASE("Tests modules collection functionalities", "[MongoDatabase]") {
-    Mongo::DbEnvironment::initialize("127.0.0.1");
+    Mongo::DbEnvironment::initialize();
     auto modulesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
     Mongo::ModulesCollection modulesCollection{*modulesCollectionEntry, "ModulesTest"};
     modulesCollection.drop();
