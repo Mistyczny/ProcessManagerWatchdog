@@ -6,17 +6,43 @@
 #include <type_traits>
 
 class Log {
+public:
+    enum class LogLevel : uint8_t { TRACE, DEBUG, INFO, WARNING, ERROR, CRITICAL };
+
 private:
     static inline std::unique_ptr<Log> instance = nullptr;
     std::shared_ptr<spdlog::logger> logger = nullptr;
 
-public:
-    enum class LogLevel : uint8_t { TRACE, DEBUG, INFO, WARNING, ERROR, CRITICAL };
+    spdlog::level::level_enum translateToSpdlogLevel(LogLevel& logLevel) {
+        spdlog::level::level_enum spdlogLevel{};
+        switch (logLevel) {
+        case LogLevel::TRACE:
+            spdlogLevel = spdlog::level::trace;
+            break;
+        case LogLevel::DEBUG:
+            spdlogLevel = spdlog::level::debug;
+            break;
+        case LogLevel::INFO:
+            spdlogLevel = spdlog::level::info;
+            break;
+        case LogLevel::WARNING:
+            spdlogLevel = spdlog::level::warn;
+            break;
+        case LogLevel::ERROR:
+            spdlogLevel = spdlog::level::err;
+            break;
+        case LogLevel::CRITICAL:
+            spdlogLevel = spdlog::level::critical;
+            break;
+        }
+        return spdlogLevel;
+    }
 
+public:
     template <typename T> Log(T moduleIdentifier, LogLevel logLevel) {
         logger = spdlog::basic_logger_mt("file_logger", std::string{"/home/kacper/Logs/" + std::string(moduleIdentifier) + ".log"});
         logger->set_pattern("[%H:%M:%S %z] [thread %t] %v");
-        logger->set_level(spdlog::level::err);
+        logger->set_level(this->translateToSpdlogLevel(logLevel));
         spdlog::flush_every(std::chrono::seconds(3));
     }
 

@@ -39,9 +39,10 @@ void ModuleConnectRequestHandler::processConnectRequest() {
         auto moduleRecord = modulesCollection.getModule(moduleIdentifier);
         if (!moduleRecord.has_value()) {
             this->connectResponse.set_responsecode(WatchdogModule::ConnectResponseData::ModuleNotExists);
-        } else if (moduleRecord->connectionState != Mongo::ConnectionState::Registered) {
+        } else if (moduleRecord->connectionState == Mongo::ConnectionState::Connected) {
             this->connectResponse.set_responsecode(WatchdogModule::ConnectResponseData::InvalidConnectionState);
         } else {
+            Log::info("ModuleConnectRequestHandler::processConnectRequest connected new module");
             moduleRecord->connectionState = Mongo::ConnectionState::Connected;
             this->authenticationData.identifier = connectRequest.identifier();
             if (modulesCollection.updateModule(std::move(*moduleRecord))) {

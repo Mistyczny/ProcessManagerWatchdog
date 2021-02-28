@@ -204,14 +204,14 @@ TEST_CASE_METHOD(MongoDbConnection, "Testing watchdog connect functionality", "[
             REQUIRE(response.header.operationCode == WatchdogModule::Operation::ConnectResponse);
             WatchdogModule::ConnectResponseData responseData{};
             responseData.ParseFromString(response.body);
-            REQUIRE(responseData.responsecode() == WatchdogModule::ConnectResponseData::InvalidConnectionState);
-            REQUIRE(responseData.has_sequencecode() == false);
+            REQUIRE(responseData.responsecode() == WatchdogModule::ConnectResponseData::Success);
+            REQUIRE(responseData.has_sequencecode() == true);
 
             auto checkRecord = modulesCollection.getModule(Types::toModuleIdentifier(1));
             REQUIRE(checkRecord.has_value() == true);
             if (checkRecord.has_value()) {
                 REQUIRE(checkRecord->identifier == Types::toModuleIdentifier(1));
-                REQUIRE(checkRecord->connectionState == Mongo::ConnectionState::Disconnected);
+                REQUIRE(checkRecord->connectionState == Mongo::ConnectionState::Connected);
                 REQUIRE(checkRecord->ipAddress == "127.0.0.1");
             }
         }

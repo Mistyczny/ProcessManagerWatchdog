@@ -99,7 +99,7 @@ std::optional<ModuleRecord> ModulesCollection::viewToModuleRecord(bsoncxx::docum
         moduleRecord->identifier = modIdentifier.get_int32();
         int32_t connState = connectionState.get_int32();
         moduleRecord->connectionState = static_cast<Mongo::ConnectionState>(connState);
-        auto adressView = ipAddress.get_utf8().value;
+        auto adressView = ipAddress.get_string().value;
         moduleRecord->ipAddress = adressView.to_string();
     }
     return moduleRecord;
