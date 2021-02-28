@@ -15,7 +15,6 @@ namespace Watchdog {
 
 class ModuleConnection : public Connection::TcpConnection<WatchdogModule::Operation> {
 protected:
-    Types::ModuleIdentifier myIdentifier;
     uint32_t sequenceCode{};
     ModuleAuthenticationData authenticationData{};
     std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection;

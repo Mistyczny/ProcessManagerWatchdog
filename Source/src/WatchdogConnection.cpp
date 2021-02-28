@@ -7,7 +7,7 @@ namespace Watchdog {
 constexpr size_t PingTimerExpirationIntervalInMilliseconds = 8000;
 
 ModuleConnection::ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& mCollection)
-    : Connection::TcpConnection<WatchdogModule::Operation>(ioContext), timer{ioContext}, modulesCollection{mCollection}, myIdentifier{-1} {}
+    : Connection::TcpConnection<WatchdogModule::Operation>(ioContext), timer{ioContext}, modulesCollection{mCollection} {}
 
 void ModuleConnection::handleReceivedMessage(std::unique_ptr<Communication::Message<WatchdogModule::Operation>> receivedMessage) {
     auto myDbConnection = modulesCollection.find(std::this_thread::get_id());
@@ -45,11 +45,11 @@ void ModuleConnection::disconnect() {
     auto myDbConnection = this->modulesCollection.find(std::this_thread::get_id());
     if (myDbConnection == std::end(modulesCollection)) {
         Log::critical("WatchdogConnection::disconnect(): Not found suitable mongodb client");
-    } else if (this->myIdentifier == -1) {
-        Log::error("myIdentifier is not set - cannot set to disconnect state");
+    } else if (this->authenticationData.identifier == -1) {
+        Log::error("authenticationData.identifier is not set - cannot set to disconnect state");
     } else {
         auto& collection = myDbConnection->second;
-        auto record = collection.getModule(this->myIdentifier);
+        auto record = collection.getModule(this->authenticationData.identifier);
         if (!record.has_value()) {
             Log::critical("No record to update in database");
         } else if (record->connectionState != Mongo::ConnectionState::Connected) {
