@@ -6,8 +6,9 @@
 
 namespace Watchdog {
 
-ModulesAcceptor::ModulesAcceptor(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& mCollection)
-    : ioContext{ioContext}, modulesCollection{mCollection} {
+ModulesAcceptor::ModulesAcceptor(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection,
+                                 std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection)
+    : ioContext{ioContext}, modulesCollection{modulesCollection}, servicesCollection{servicesCollection} {
     try {
         boost::asio::ip::tcp::endpoint endpoint{boost::asio::ip::tcp::v4(), 1234};
         acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(ioContext, endpoint);
@@ -18,7 +19,7 @@ ModulesAcceptor::ModulesAcceptor(boost::asio::io_context& ioContext, std::map<st
 
 void ModulesAcceptor::startAcceptingConnections() {
     if (acceptor) {
-        auto newSession = std::make_shared<ModuleConnection>(ioContext, modulesCollection);
+        auto newSession = std::make_shared<ModuleConnection>(ioContext, modulesCollection, servicesCollection);
         acceptor->async_accept(newSession->getSocket(),
                                boost::bind(&ModulesAcceptor::postAccept, this, newSession, boost::asio::placeholders::error));
     } else {
@@ -37,8 +38,9 @@ void ModulesAcceptor::postAccept(std::shared_ptr<ModuleConnection> newSession, c
 }
 
 ServicesAcceptor::ServicesAcceptor(boost::asio::io_context& ioContext,
+                                   std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection,
                                    std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection)
-    : ioContext{ioContext}, servicesCollection{servicesCollection} {
+    : ioContext{ioContext}, servicesCollection{servicesCollection}, modulesCollection{modulesCollection} {
     try {
         boost::asio::ip::tcp::endpoint endpoint{boost::asio::ip::tcp::v4(), 1235};
         acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(ioContext, endpoint);
@@ -49,7 +51,7 @@ ServicesAcceptor::ServicesAcceptor(boost::asio::io_context& ioContext,
 
 void ServicesAcceptor::startAcceptingServices() {
     if (acceptor) {
-        auto newSession = std::make_shared<ServiceConnection>(ioContext, servicesCollection);
+        auto newSession = std::make_shared<ServiceConnection>(ioContext, modulesCollection, servicesCollection);
         acceptor->async_accept(newSession->getSocket(),
                                boost::bind(&ServicesAcceptor::serviceAccepted, this, newSession, boost::asio::placeholders::error));
     } else {

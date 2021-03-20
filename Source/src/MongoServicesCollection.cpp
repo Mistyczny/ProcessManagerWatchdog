@@ -24,6 +24,7 @@ std::optional<ServiceRecord> ServicesCollection::viewToServiceRecord(bsoncxx::do
     auto serviceIdentifier = view["ServiceIdentifier"];
     auto connectionState = view["ConnectionState"];
     auto ipAddress = view["IpAddress"];
+    auto port = view["Port"];
 
     if (serviceIdentifier.type() != bsoncxx::type::k_int32) {
         Log::error("Failed to get module identifier");
@@ -31,6 +32,8 @@ std::optional<ServiceRecord> ServicesCollection::viewToServiceRecord(bsoncxx::do
         Log::error("Failed to get connection state");
     } else if (ipAddress.type() != bsoncxx::type::k_utf8) {
         Log::error("Failed to get ip address");
+    } else if (port.type() != bsoncxx::type::k_int32) {
+        Log::error("Failed to get port");
     } else {
         serviceRecord = std::make_optional<ServiceRecord>();
         serviceRecord->identifier = serviceIdentifier.get_int32();
@@ -48,6 +51,7 @@ bool ServicesCollection::insertOne(ServiceRecord&& record) {
     bsoncxx::document::value newService = builder << "ServiceIdentifier" << record.identifier // To prevent line move by clang
                                                   << "IpAddress" << record.ipAddress          // To prevent line move by clang
                                                   << "ConnectionState" << static_cast<int32_t>(record.connectionState) // Prevent move
+                                                  << "Port" << record.port // To prevent line move by clang
                                                   << finalize;
     auto result = servicesCollection.insert_one(std::move(newService));
     if (!result) {
@@ -78,6 +82,22 @@ bool ServicesCollection::updateService(ServiceRecord&& record) {
                                                     << "$set" << open_document                  // To prevent line move by clang
                                                     << "ConnectionState" << static_cast<int32_t>(record.connectionState) // Prevent
                                                     << "IpAddress" << record.ipAddress << close_document << finalize);
+    if (result) {
+        recordUpdated = true;
+    }
+    return recordUpdated;
+}
+
+bool ServicesCollection::markAllConnectedAsDisconnected() {
+    bool recordUpdated{false};
+    auto result =
+        servicesCollection.update_many(document{} // To prevent line move by clang
+                                           << "ConnectionState" << static_cast<int32_t>(ServiceConnectionState::Connected) // To prevent
+                                           << finalize,               // To prevent line move by clang
+                                       document{}                     // To prevent line move by clang
+                                           << "$set" << open_document // To prevent line move by clang
+                                           << "ConnectionState" << static_cast<int32_t>(ServiceConnectionState::Disconnected) // To prevent
+                                           << close_document << finalize);
     if (result) {
         recordUpdated = true;
     }

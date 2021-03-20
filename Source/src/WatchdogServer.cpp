@@ -7,7 +7,9 @@
 
 namespace Watchdog {
 
-WatchdogServer::WatchdogServer() : modulesAcceptor{ioContext, modulesCollection}, servicesAcceptor{ioContext, servicesCollection} {
+WatchdogServer::WatchdogServer()
+    : modulesAcceptor{ioContext, modulesCollection, servicesCollection}, servicesAcceptor{ioContext, modulesCollection,
+                                                                                          servicesCollection} {
     threadsState.start = false;
 }
 
@@ -26,8 +28,9 @@ bool WatchdogServer::createWorkingThreads() {
             auto servicesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
             Mongo::ServicesCollection services{*servicesCollectionEntry, "Services"};
             this->servicesCollection.insert({this_id, std::move(services)});
+            std::cout << "THIS ID= " << this_id << std::endl;
+            std::cout << "SIZE servicesCollection: " << servicesCollection.size() << std::endl;
         });
-
     } catch (std::exception& ex) {
         created = false;
     }
@@ -59,6 +62,16 @@ bool WatchdogServer::startAcceptingConnections() {
         acceptingConnections = false;
     }
     return acceptingConnections;
+}
+
+void WatchdogServer::setAllConnectedToDisconnectedState() {
+    auto modulesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
+    Mongo::ModulesCollection modulesCollection{*modulesCollectionEntry, "Modules"};
+    modulesCollection.markAllConnectedAsDisconnected();
+
+    auto servicesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
+    Mongo::ServicesCollection servicesCollection{*servicesCollectionEntry, "Services"};
+    servicesCollection.markAllConnectedAsDisconnected();
 }
 
 } // namespace Watchdog

@@ -18,6 +18,7 @@ protected:
     uint32_t sequenceCode{};
     ModuleAuthenticationData authenticationData{};
     std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection;
+    std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection;
     boost::asio::deadline_timer timer;
     boost::asio::ip::tcp::endpoint clientEndpoint;
 
@@ -27,7 +28,8 @@ protected:
     std::unique_ptr<ModuleRequestHandler> getRequestHandler(const WatchdogModule::Operation&, Mongo::ModulesCollection&);
 
 public:
-    ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&);
+    ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&,
+                     std::map<std::thread::id, Mongo::ServicesCollection>&);
     ~ModuleConnection() override { Log::debug("Module connection terminated"); }
 
     void handleReceivedMessage(std::unique_ptr<Communication::Message<WatchdogModule::Operation>> receivedMessage) override;
@@ -38,6 +40,7 @@ public:
 
 class ServiceConnection : public Connection::TcpConnection<WatchdogService::Operation> {
 protected:
+    std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection;
     std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection;
     ServiceAuthenticationData serviceAuthenticationData;
 
@@ -48,8 +51,9 @@ protected:
     std::unique_ptr<ServiceRequestHandler> getRequestHandler(const WatchdogService::Operation&, Mongo::ServicesCollection&);
 
 public:
-    explicit ServiceConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ServicesCollection>&);
-    ~ServiceConnection() override = default;
+    explicit ServiceConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&,
+                               std::map<std::thread::id, Mongo::ServicesCollection>&);
+    ~ServiceConnection() override;
 };
 
 } // namespace Watchdog

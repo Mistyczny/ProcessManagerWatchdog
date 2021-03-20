@@ -12,10 +12,12 @@ class ModulesAcceptor {
 private:
     boost::asio::io_context& ioContext;
     std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection;
+    std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> acceptor = nullptr;
 
 public:
-    ModulesAcceptor(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&);
+    ModulesAcceptor(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&,
+                    std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection);
     virtual ~ModulesAcceptor() = default;
 
     void startAcceptingConnections();
@@ -25,11 +27,13 @@ public:
 class ServicesAcceptor {
 private:
     boost::asio::io_context& ioContext;
-    std::map<std::thread::id, Mongo::ServicesCollection> servicesCollection;
+    std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection;
+    std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection;
     std::unique_ptr<boost::asio::ip::tcp::acceptor> acceptor{nullptr};
 
 public:
-    explicit ServicesAcceptor(boost::asio::io_context&, std::map<std::thread::id, Mongo::ServicesCollection>&);
+    explicit ServicesAcceptor(boost::asio::io_context&, std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection,
+                              std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection);
     virtual ~ServicesAcceptor() = default;
 
     void startAcceptingServices();

@@ -10,7 +10,8 @@ set(SOURCES
         src/MongoServicesCollection.cpp
         src/Types.cpp
         src/WatchdogServiceRequestsHandlers.cpp
-        src/WatchdogModuleRequestsHandlers.cpp)
+        src/WatchdogModuleRequestsHandlers.cpp
+        )
 
 add_executable(Watchdog ${SOURCES})
 

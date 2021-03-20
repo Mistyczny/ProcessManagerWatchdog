@@ -41,6 +41,7 @@ public:
     void runIoContext();
     void setupSignalHandlers();
     bool startAcceptingConnections();
+    void setAllConnectedToDisconnectedState();
 };
 
 } // namespace Watchdog

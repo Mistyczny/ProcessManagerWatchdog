@@ -23,6 +23,7 @@ bool ModulesCollection::insertOne(ModuleRecord&& record) {
     bsoncxx::document::value newModule = builder << "ModuleIdentifier" << record.identifier // To prevent line move by clang
                                                  << "IpAddress" << record.ipAddress         // To prevent line move by clang
                                                  << "ConnectionState" << static_cast<int32_t>(record.connectionState) // Prevent move
+                                                 << "Port" << record.port // To prevent line move by clang
                                                  << finalize;
     auto result = modulesCollection.insert_one(std::move(newModule));
     if (!result) {
@@ -87,6 +88,7 @@ std::optional<ModuleRecord> ModulesCollection::viewToModuleRecord(bsoncxx::docum
     auto modIdentifier = view["ModuleIdentifier"];
     auto connectionState = view["ConnectionState"];
     auto ipAddress = view["IpAddress"];
+    auto port = view["Port"];
 
     if (modIdentifier.type() != bsoncxx::type::k_int32) {
         Log::error("Failed to get module identifier");
@@ -94,6 +96,8 @@ std::optional<ModuleRecord> ModulesCollection::viewToModuleRecord(bsoncxx::docum
         Log::error("Failed to get connection state");
     } else if (ipAddress.type() != bsoncxx::type::k_utf8) {
         Log::error("Failed to get ip address");
+    } else if (port.type() != bsoncxx::type::k_int32) {
+        Log::error("Failed to get port");
     } else {
         moduleRecord = std::make_optional<ModuleRecord>();
         moduleRecord->identifier = modIdentifier.get_int32();
@@ -147,13 +151,30 @@ std::vector<ModuleRecord> ModulesCollection::getAllModules() {
 
 bool ModulesCollection::updateModule(ModuleRecord&& record) {
     bool recordUpdated{false};
-    auto result = modulesCollection.update_one(document{}                                     // To prevent line move by clang
-                                                   << "ModuleIdentifier" << record.identifier // To prevent line move by clang
-                                                   << finalize,                               // To prevent line move by clang
-                                               document{}                                     // To prevent line move by clang
-                                                   << "$set" << open_document                 // To prevent line move by clang
-                                                   << "ConnectionState" << static_cast<int32_t>(record.connectionState) // Prevent
-                                                   << "IpAddress" << record.ipAddress << close_document << finalize);
+    auto result =
+        modulesCollection.update_one(document{}                                     // To prevent line move by clang
+                                         << "ModuleIdentifier" << record.identifier // To prevent line move by clang
+                                         << finalize,                               // To prevent line move by clang
+                                     document{}                                     // To prevent line move by clang
+                                         << "$set" << open_document                 // To prevent line move by clang
+                                         << "ConnectionState" << static_cast<int32_t>(record.connectionState) // Prevent
+                                         << "IpAddress" << record.ipAddress << "Port" << record.port << close_document << finalize);
+    if (result) {
+        recordUpdated = true;
+    }
+    return recordUpdated;
+}
+
+bool ModulesCollection::markAllConnectedAsDisconnected() {
+    bool recordUpdated{false};
+    auto result =
+        modulesCollection.update_many(document{} // To prevent line move by clang
+                                          << "ConnectionState" << static_cast<int32_t>(ConnectionState::Connected) // To prevent
+                                          << finalize,               // To prevent line move by clang
+                                      document{}                     // To prevent line move by clang
+                                          << "$set" << open_document // To prevent line move by clang
+                                          << "ConnectionState" << static_cast<int32_t>(ConnectionState::Disconnected) // To prevent
+                                          << close_document << finalize);
     if (result) {
         recordUpdated = true;
     }

@@ -12,6 +12,7 @@ int main() {
     } else {
         Watchdog::WatchdogServer watchdog{};
         watchdog.setupSignalHandlers();
+        watchdog.setAllConnectedToDisconnectedState();
         if (!watchdog.startAcceptingConnections()) {
             Log::critical("main: Failed to start accepting connections");
         } else if (!watchdog.createWorkingThreads()) {

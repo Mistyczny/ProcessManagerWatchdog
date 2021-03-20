@@ -9,6 +9,7 @@ namespace Mongo {
 enum class ServiceConnectionState : int32_t { Registered, Connected, Disconnected };
 
 struct ServiceRecord {
+    uint16_t port;
     Types::ServiceIdentifier identifier;
     ServiceConnectionState connectionState;
     std::string ipAddress;
@@ -47,6 +48,8 @@ public:
     std::optional<ServiceRecord> getService(const Types::ServiceIdentifier& moduleIdentifier);
     bool updateService(ServiceRecord&& record);
     void drop();
+
+    bool markAllConnectedAsDisconnected();
 };
 
 } // namespace Mongo

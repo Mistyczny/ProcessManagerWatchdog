@@ -6,8 +6,10 @@ namespace Watchdog {
 
 constexpr size_t PingTimerExpirationIntervalInMilliseconds = 8000;
 
-ModuleConnection::ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& mCollection)
-    : Connection::TcpConnection<WatchdogModule::Operation>(ioContext), timer{ioContext}, modulesCollection{mCollection} {}
+ModuleConnection::ModuleConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>& mCollection,
+                                   std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection)
+    : Connection::TcpConnection<WatchdogModule::Operation>(ioContext), timer{ioContext}, modulesCollection{mCollection},
+      servicesCollection{servicesCollection} {}
 
 void ModuleConnection::handleReceivedMessage(std::unique_ptr<Communication::Message<WatchdogModule::Operation>> receivedMessage) {
     auto myDbConnection = modulesCollection.find(std::this_thread::get_id());
@@ -104,14 +106,19 @@ std::unique_ptr<ModuleRequestHandler> ModuleConnection::getRequestHandler(const 
 void ModuleConnection::setTimerWaitForConnection() { this->setTimerExpiration(3000); }
 
 ServiceConnection::ServiceConnection(boost::asio::io_context& ioContext,
+                                     std::map<std::thread::id, Mongo::ModulesCollection>& modulesCollection,
                                      std::map<std::thread::id, Mongo::ServicesCollection>& servicesCollection)
-    : Connection::TcpConnection<WatchdogService::Operation>{ioContext}, servicesCollection{servicesCollection} {}
+    : Connection::TcpConnection<WatchdogService::Operation>{ioContext}, servicesCollection{servicesCollection}, modulesCollection{
+                                                                                                                    modulesCollection} {}
+
+ServiceConnection::~ServiceConnection() { Log::debug("Service connection terminated"); }
 
 std::unique_ptr<ServiceRequestHandler> ServiceConnection::getRequestHandler(const WatchdogService::Operation& operationCode,
                                                                             Mongo::ServicesCollection& servicesCollection) {
     std::unique_ptr<ServiceRequestHandler> requestHandler{nullptr};
     auto setTimer = std::bind([](auto connection) { connection->setTimerExpiration(PingTimerExpirationIntervalInMilliseconds); },
                               this->shared_from_this());
+    std::cout << "RECEIVED OP CODE: " << operationCode << std::endl;
     switch (operationCode) {
     case WatchdogService::Operation::ConnectRequest:
         requestHandler = std::make_unique<ServiceConnectRequestHandler>(this->serviceAuthenticationData, servicesCollection, setTimer);
@@ -133,13 +140,15 @@ std::unique_ptr<ServiceRequestHandler> ServiceConnection::getRequestHandler(cons
 
 void ServiceConnection::handleReceivedMessage(std::unique_ptr<Communication::Message<WatchdogService::Operation>> receivedMessage) {
     auto myDbConnection = this->servicesCollection.find(std::this_thread::get_id());
+    std::cout << "SIZE OF servicesCollection: " << servicesCollection.size() << std::endl;
+    std::for_each(std::begin(servicesCollection), std::end(servicesCollection), [](auto& coll) { std::cout << coll.first << std::endl; });
     if (myDbConnection == std::end(servicesCollection)) {
-        Log::critical("WatchdogConnection::handleReceivedMessage(): Not found suitable mongodb client");
+        Log::critical("ServiceConnection::handleReceivedMessage(): Not found suitable mongodb client");
     } else {
         auto& collection = myDbConnection->second;
 
         if (!receivedMessage) {
-            Log::error("handleReceivedMessage: receivedMessage is nullptr");
+            Log::error("ServiceConnection::handleReceivedMessage(): receivedMessage is nullptr");
         } else {
             auto& [messageHeader, messageBody] = *receivedMessage;
             auto responseCreator = this->getRequestHandler(messageHeader.operationCode, collection);
