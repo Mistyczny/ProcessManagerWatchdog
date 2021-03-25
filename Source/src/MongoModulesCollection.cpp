@@ -105,6 +105,7 @@ std::optional<ModuleRecord> ModulesCollection::viewToModuleRecord(bsoncxx::docum
         moduleRecord->connectionState = static_cast<Mongo::ConnectionState>(connState);
         auto adressView = ipAddress.get_string().value;
         moduleRecord->ipAddress = adressView.to_string();
+        moduleRecord->port = port.get_int32();
     }
     return moduleRecord;
 }

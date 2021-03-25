@@ -13,9 +13,9 @@ target_link_libraries(ModulesCollectionTest
         PRIVATE 
     pthread 
     catchTestMain 
-    ${Boost_LIBRARIES} 
-    mongocxx 
-    bsoncxx
+    ${Boost_LIBRARIES}
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
 )
 target_include_directories(ModulesCollectionTest 
         PRIVATE 
@@ -40,14 +40,13 @@ target_link_libraries(ServicesCollectionTest
     pthread 
     catchTestMain 
     ${Boost_LIBRARIES}
-    mongocxx 
-    bsoncxx
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
 )
 target_include_directories(ServicesCollectionTest 
         PRIVATE
     ${CMAKE_SOURCE_DIR}/Source/include
     ${BOOST_ROOT}
-    ${MongoCxxIncludes}
 )
 
 add_test(NAME ModulesCollectionTest COMMAND ModulesCollectionTest)

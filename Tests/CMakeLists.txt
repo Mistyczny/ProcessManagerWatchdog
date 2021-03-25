@@ -1,5 +1,7 @@
 project(ProcessManagerWatchdogTests)
 
+find_package(Catch2 REQUIRED)
+
 add_subdirectory(MongoDatabaseTests)
 add_subdirectory(WatchdogModulesRequestHandlersTests)
 add_subdirectory(WatchdogServicesRequestHandlersTests)

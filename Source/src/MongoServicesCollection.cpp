@@ -64,7 +64,6 @@ std::optional<ServiceRecord> ServicesCollection::getService(const Types::Service
     std::optional<ServiceRecord> serviceRecord{std::nullopt};
     auto builder = document{};
     bsoncxx::document::value entry = builder << "ServiceIdentifier" << serviceIdentifier << finalize;
-
     auto result = servicesCollection.find_one(std::move(entry));
     if (result) {
         bsoncxx::document::view view{result->view()};

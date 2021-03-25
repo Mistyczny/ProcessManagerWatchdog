@@ -22,7 +22,6 @@ TEST_CASE("Tests module collection performance", "[MongoDatabase]") {
     REQUIRE(modulesCollection.insertOne(std::move(firstRecord)) == true);
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout<< elapsedTime.count() <<std::endl;
 
     // clean database before running multi insert
     modulesCollection.drop();
@@ -43,7 +42,6 @@ TEST_CASE("Tests module collection performance", "[MongoDatabase]") {
     });
     auto stopMulti = std::chrono::high_resolution_clock::now();
     auto elapsedTimeMulti = std::chrono::duration_cast<std::chrono::microseconds>(stopMulti - startMulti);
-    std::cout<< elapsedTimeMulti.count() <<std::endl;
 
     modulesCollection.drop();
 }

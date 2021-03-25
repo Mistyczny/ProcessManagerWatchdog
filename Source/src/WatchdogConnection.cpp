@@ -113,12 +113,37 @@ ServiceConnection::ServiceConnection(boost::asio::io_context& ioContext,
 
 ServiceConnection::~ServiceConnection() { Log::debug("Service connection terminated"); }
 
+void ServiceConnection::disconnect() {
+    auto myDbConnection = this->servicesCollection.find(std::this_thread::get_id());
+    if (myDbConnection == std::end(servicesCollection)) {
+        Log::critical("ServiceConnection::disconnect(): Not found suitable mongodb client");
+    } else if (this->serviceAuthenticationData.identifier == -1) {
+        Log::error("authenticationData.identifier is not set - cannot set to disconnect state");
+    } else {
+        auto& collection = myDbConnection->second;
+        auto record = collection.getService(this->serviceAuthenticationData.identifier);
+        if (!record.has_value()) {
+            Log::critical("No record to update in database");
+        } else if (record->connectionState != Mongo::ServiceConnectionState::Connected) {
+            Log::trace("Disconnected in invalid state");
+        } else {
+            Log::trace("Set disconnected state in database");
+            record->connectionState = Mongo::ServiceConnectionState::Disconnected;
+            collection.updateService(std::move(*record));
+        }
+    }
+
+    if (this->socket->is_open()) {
+        this->socket->close();
+    }
+    this->timer.cancel();
+}
+
 std::unique_ptr<ServiceRequestHandler> ServiceConnection::getRequestHandler(const WatchdogService::Operation& operationCode,
                                                                             Mongo::ServicesCollection& servicesCollection) {
     std::unique_ptr<ServiceRequestHandler> requestHandler{nullptr};
     auto setTimer = std::bind([](auto connection) { connection->setTimerExpiration(PingTimerExpirationIntervalInMilliseconds); },
                               this->shared_from_this());
-    std::cout << "RECEIVED OP CODE: " << operationCode << std::endl;
     switch (operationCode) {
     case WatchdogService::Operation::ConnectRequest:
         requestHandler = std::make_unique<ServiceConnectRequestHandler>(this->serviceAuthenticationData, servicesCollection, setTimer);
@@ -140,8 +165,6 @@ std::unique_ptr<ServiceRequestHandler> ServiceConnection::getRequestHandler(cons
 
 void ServiceConnection::handleReceivedMessage(std::unique_ptr<Communication::Message<WatchdogService::Operation>> receivedMessage) {
     auto myDbConnection = this->servicesCollection.find(std::this_thread::get_id());
-    std::cout << "SIZE OF servicesCollection: " << servicesCollection.size() << std::endl;
-    std::for_each(std::begin(servicesCollection), std::end(servicesCollection), [](auto& coll) { std::cout << coll.first << std::endl; });
     if (myDbConnection == std::end(servicesCollection)) {
         Log::critical("ServiceConnection::handleReceivedMessage(): Not found suitable mongodb client");
     } else {
@@ -174,6 +197,14 @@ void ServiceConnection::createMessageResponse(std::unique_ptr<ServiceRequestHand
     }
 }
 
-void ServiceConnection::onTimerExpiration() {}
+void ServiceConnection::onTimerExpiration() {
+    Log::info("Timer expired properly");
+    auto now = boost::posix_time::microsec_clock::local_time();
+    if ((now - last_ping).total_milliseconds() >= PingTimerExpirationIntervalInMilliseconds) {
+        Log::error("ServiceConnection::onTimerExpiration(): Not received ping - disconnecting");
+        this->disconnect();
+    }
+    last_ping = boost::posix_time::microsec_clock::local_time();
+}
 
 } // namespace Watchdog

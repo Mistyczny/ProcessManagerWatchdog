@@ -32,6 +32,7 @@ void ModulesAcceptor::postAccept(std::shared_ptr<ModuleConnection> newSession, c
         Log::critical(std::string("Failure during accepting connection"));
         return;
     }
+    Log::info("Module accepted");
     newSession->setTimerWaitForConnection();
     newSession->startReading();
     this->startAcceptingConnections();
@@ -64,7 +65,7 @@ void ServicesAcceptor::serviceAccepted(std::shared_ptr<ServiceConnection> newSer
         Log::critical(std::string("Failure during accepting connection"));
         return;
     }
-    Log::critical(std::string("Service accepted"));
+    Log::info("Service accepted");
     this->startAcceptingServices();
     newServiceSession->startReading();
 }

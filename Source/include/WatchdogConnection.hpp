@@ -53,6 +53,7 @@ protected:
 public:
     explicit ServiceConnection(boost::asio::io_context& ioContext, std::map<std::thread::id, Mongo::ModulesCollection>&,
                                std::map<std::thread::id, Mongo::ServicesCollection>&);
+    void disconnect() override;
     ~ServiceConnection() override;
 };
 

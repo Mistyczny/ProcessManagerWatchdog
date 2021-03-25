@@ -13,8 +13,8 @@ target_link_libraries(WatchdogServiceRequestConnectHandlerTest
     pthread
     catchTestMain
     ${Boost_LIBRARIES}
-    mongocxx
-    bsoncxx
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
     WatchdogServiceProto
     ${PROTOBUF_LIBRARY}
 )
@@ -22,7 +22,6 @@ target_include_directories(WatchdogServiceRequestConnectHandlerTest
         PRIVATE
     ${SOURCE_INCLUDE}
     ${BOOST_ROOT}
-    ${MongoCxxIncludes}
     ${CMAKE_BINARY_DIR}/Protocols
 )
 
@@ -32,8 +31,8 @@ target_link_libraries(WatchdogServiceRequestPingHandlerTest
     pthread
     catchTestMain
     ${Boost_LIBRARIES}
-    mongocxx
-    bsoncxx
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
     WatchdogServiceProto
     ${PROTOBUF_LIBRARY}
 )
@@ -41,7 +40,6 @@ target_include_directories(WatchdogServiceRequestPingHandlerTest
         PRIVATE 
     ${SOURCE_INCLUDE}
     ${BOOST_ROOT}
-    ${MongoCxxIncludes}
     ${CMAKE_BINARY_DIR}/Protocols
 )
 
@@ -51,8 +49,8 @@ target_link_libraries(WatchdogServiceRequestReconnectHandlerTest
     pthread
     catchTestMain
     ${Boost_LIBRARIES}
-    mongocxx
-    bsoncxx
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
     WatchdogServiceProto
     ${PROTOBUF_LIBRARY}
 )
@@ -60,7 +58,6 @@ target_include_directories(WatchdogServiceRequestReconnectHandlerTest
         PRIVATE
     ${SOURCE_INCLUDE}
     ${BOOST_ROOT}
-    ${MongoCxxIncludes}
     ${CMAKE_BINARY_DIR}/Protocols
 )
 
@@ -70,8 +67,8 @@ target_link_libraries(WatchdogServiceRequestShutdownHandlerTest
     pthread
     catchTestMain
     ${Boost_LIBRARIES}
-    mongocxx
-    bsoncxx
+    mongo::mongocxx_shared
+    mongo::bsoncxx_shared
     WatchdogServiceProto
     ${PROTOBUF_LIBRARY}
 )
@@ -79,7 +76,6 @@ target_include_directories(WatchdogServiceRequestShutdownHandlerTest
         PRIVATE
     ${SOURCE_INCLUDE}
     ${BOOST_ROOT}
-    ${MongoCxxIncludes}
     ${CMAKE_BINARY_DIR}/Protocols
 )
 

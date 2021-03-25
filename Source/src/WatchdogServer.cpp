@@ -28,8 +28,6 @@ bool WatchdogServer::createWorkingThreads() {
             auto servicesCollectionEntry = Mongo::DbEnvironment::getInstance()->getClient();
             Mongo::ServicesCollection services{*servicesCollectionEntry, "Services"};
             this->servicesCollection.insert({this_id, std::move(services)});
-            std::cout << "THIS ID= " << this_id << std::endl;
-            std::cout << "SIZE servicesCollection: " << servicesCollection.size() << std::endl;
         });
     } catch (std::exception& ex) {
         created = false;
