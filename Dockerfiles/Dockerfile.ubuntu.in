@@ -1,0 +1,78 @@
+FROM ubuntu:latest
+ENV DEBIAN_FRONTEND=nonintercative
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    git \
+    make \
+    cmake \
+    gcc \
+    g++ \
+    autoconf \
+    automake \
+    libtool \
+    curl \
+    unzip \
+    libssl-dev \
+    libsasl2-dev \
+    libmongoc-1.0-0 \
+    libbson-1.0-0 \
+    gnupg2
+
+RUN mkdir -p /root/boost \
+    && cd /root/boost \
+    && wget https://dl.bintray.com/boostorg/release/${BoostVersion}/source/boost_${BoostDownloadVersion}.tar.gz \
+    && tar -xzf boost_${BoostDownloadVersion}.tar.gz --strip-components=1 \
+    && ./bootstrap.sh \
+    && ./b2 install \
+    && rm -rf /root/boost
+
+RUN mkdir -p /root/protobuf \
+    && cd /root/protobuf \
+    && wget https://github.com/protocolbuffers/protobuf/releases/download/v${ProtobufVersion}/protobuf-cpp-${ProtobufVersion}.tar.gz \
+    && tar -xzf protobuf-cpp-${ProtobufVersion}.tar.gz --strip-components=1 \
+    && ./configure \
+    && make \
+    && make install \
+    && ldconfig \
+    && rm -rf /root/protobuf
+
+RUN mkdir -p /root/mongo-c-driver \
+    && cd /root/mongo-c-driver \
+    && wget https://github.com/mongodb/mongo-c-driver/releases/download/${MongocVersion}/mongo-c-driver-${MongocVersion}.tar.gz \
+    && tar -xzf mongo-c-driver-${MongocVersion}.tar.gz --strip-components=1 \
+    && mkdir cmake-build \
+    && cd ./cmake-build \
+    && cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+    && make \
+    && make install \
+    && rm -rf /root/mongo-c-driver
+
+RUN mkdir -p /root/mongo-cxx-driver \
+    && cd /root/mongo-cxx-driver \
+    && wget https://github.com/mongodb/mongo-cxx-driver/releases/download/r${MongocxxVersion}/mongo-cxx-driver-r${MongocxxVersion}.tar.gz \
+    && tar -xzf mongo-cxx-driver-r${MongocxxVersion}.tar.gz --strip-components=1 \
+    && cd ./build \
+    && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \
+    && make \
+    && make install \
+    && rm -rf /root/mongo-cxx-driver
+
+RUN mkdir -p /root/spdlog \
+    && cd /root/spdlog \
+    && wget https://github.com/gabime/spdlog/archive/refs/tags/v${SpdlogVersion}.tar.gz \
+    && tar -xzf v${SpdlogVersion}.tar.gz --strip-components=1 \
+    && mkdir build \
+    && cd ./build \
+    && cmake .. \
+    && make \
+    && make install \
+    && rm -rf /root/spdlog
+
+RUN mkdir -p /root/jfrog \
+    && cd /root/jfrog \
+    && wget -qO - https://releases.jfrog.io/artifactory/api/gpg/key/public | apt-key add - \
+    && echo "deb https://releases.jfrog.io/artifactory/jfrog-debs xenial contrib" | tee -a /etc/apt/sources.list \
+    && apt update \
+    && apt install -y jfrog-cli \
+    && rm -rf /root/jfrog

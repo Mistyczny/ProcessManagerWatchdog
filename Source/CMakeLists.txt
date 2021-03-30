@@ -1,5 +1,5 @@
-project(Watchdog)
-
+# Copyright 2021, Kacper Waśniowski
+# All rights reserved.
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/WatchdogMain.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/WatchdogServer.cpp

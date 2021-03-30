@@ -20,7 +20,6 @@ int main() {
         } else {
             watchdog.runIoContext();
         }
-        Log::critical("Leaving");
     }
 
     return 0;

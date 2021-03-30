@@ -39,8 +39,7 @@ std::optional<ServiceRecord> ServicesCollection::viewToServiceRecord(bsoncxx::do
         serviceRecord->identifier = serviceIdentifier.get_int32();
         int32_t connState = connectionState.get_int32();
         serviceRecord->connectionState = static_cast<Mongo::ServiceConnectionState>(connState);
-        auto adressView = ipAddress.get_string().value;
-        serviceRecord->ipAddress = adressView.to_string();
+        serviceRecord->ipAddress = ipAddress.get_utf8().value.to_string();
     }
     return serviceRecord;
 }
