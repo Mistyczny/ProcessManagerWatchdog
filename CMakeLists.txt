@@ -24,6 +24,8 @@ set(SOURCE_CODE ${CMAKE_CURRENT_SOURCE_DIR}/Source/src)
 set(SOURCE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/Source/include)
 set(artifactoryDownloader ${CMAKE_SOURCE_DIR}/Toolkits/artifactory_downloader.sh)
 
+configure_file(Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile)
+
 add_subdirectory(Dockerfiles)
 add_subdirectory(Protocols)
 add_subdirectory(Source)
