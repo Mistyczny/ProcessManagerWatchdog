@@ -1,5 +1,6 @@
 #include "MongoDbEnvironment.hpp"
-#include <bsoncxx/json.hpp>
+#include "Logging.hpp"
+#include <fstream>
 #include <iostream>
 
 namespace Mongo {
@@ -8,13 +9,49 @@ using bsoncxx::builder::basic::array;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
-bool DbEnvironment::initialize(std::string address) {
+DbConfigurationReader::DbConfigurationReader(DbConfiguration& dbConfiguration) : dbConfiguration{dbConfiguration} {}
+
+bool DbConfigurationReader::readConfiguration() {
+    bool readConfiguration{false};
+    std::string configFile{configurationPath};
+    std::ifstream ifs(configFile);
+    if (ifs.is_open()) {
+        try {
+            jsonConfig = nlohmann::json::parse(ifs);
+            readConfiguration = this->read();
+        } catch (nlohmann::json::exception& ex) {
+            readConfiguration = false;
+        }
+    }
+    return readConfiguration;
+}
+
+bool DbConfigurationReader::read() {
+    bool read{false};
+    if (!jsonConfig.contains("Ip")) {
+        Log::critical("Read mongodb configuration file does not contain ip");
+    } else if (!jsonConfig.contains("Port")) {
+        Log::critical("Read mongodb configuration file does not contain port");
+    } else {
+        dbConfiguration.ip = jsonConfig["Ip"].get<std::string>();
+        dbConfiguration.port = jsonConfig["Port"].get<uint32_t>();
+        read = true;
+    }
+    return read;
+}
+
+bool DbEnvironment::initialize() {
     bool isInitialized{true};
     if (!instance) {
-        try {
-            instance = std::make_unique<DbEnvironment>(address);
-        } catch (std::exception& ex) {
-            isInitialized = false;
+        DbConfiguration dbConfiguration{};
+        DbConfigurationReader dbConfigurationReader{dbConfiguration};
+        if (dbConfigurationReader.readConfiguration()) {
+            std::string address = dbConfiguration.makeAddressString();
+            try {
+                instance = std::make_unique<DbEnvironment>(address);
+            } catch (std::exception& ex) {
+                isInitialized = false;
+            }
         }
     }
     return isInitialized;
@@ -41,7 +78,6 @@ bool DbEnvironment::isConnected() {
         }
     } catch (std::exception&) {
         mongoDbConnected = false;
-        std::cout << "TIMED OUT" << std::endl;
     }
     return mongoDbConnected;
 }

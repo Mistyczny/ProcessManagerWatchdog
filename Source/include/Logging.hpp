@@ -39,8 +39,8 @@ private:
     }
 
 public:
-    template <typename T> Log(T moduleIdentifier, LogLevel logLevel) {
-        logger = spdlog::basic_logger_mt("file_logger", std::string{"/home/kacper/Logs/" + std::string(moduleIdentifier) + ".log"});
+    Log(LogLevel logLevel) {
+        logger = spdlog::basic_logger_mt("file_logger", std::string{"/var/log/Watchdog.log"});
         logger->set_pattern("[%H:%M:%S %z] [thread %t] %v");
         logger->set_level(this->translateToSpdlogLevel(logLevel));
         spdlog::flush_every(std::chrono::seconds(3));
@@ -48,9 +48,9 @@ public:
 
     virtual ~Log() = default;
 
-    template <typename T> static void initialize(T moduleIdentifier, LogLevel logLevel) {
+    static void initialize(LogLevel logLevel) {
         if (!instance) {
-            instance = std::make_unique<Log>(moduleIdentifier, logLevel);
+            instance = std::make_unique<Log>(logLevel);
         }
     }
 

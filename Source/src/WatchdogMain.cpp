@@ -5,7 +5,7 @@
 
 int main() {
     srand(time(NULL));
-    Log::initialize("WatchdogServer", Log::LogLevel::TRACE);
+    Log::initialize(Log::LogLevel::INFO);
     Mongo::DbEnvironment::initialize();
     if (!Mongo::DbEnvironment::isConnected()) {
         Log::critical("main: Failed connection to mongoDB");

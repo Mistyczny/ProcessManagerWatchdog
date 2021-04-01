@@ -69,6 +69,17 @@ RUN mkdir -p /root/spdlog \
     && make install \
     && rm -rf /root/spdlog
 
+RUN mkdir -p /root/nlohmann_json \
+    && cd /root/nlohmann_json \
+    && wget https://github.com/nlohmann/json/archive/refs/tags/v${NlohmannVersion}.tar.gz \
+    && tar -xzf  v${NlohmannVersion}.tar.gz --strip-components=1 \
+    && mkdir build \
+    && cd ./build \
+    && cmake .. \
+    && make \
+    && make install \
+    && rm -rf /root/nlohmann_json
+
 RUN mkdir -p /root/jfrog \
     && cd /root/jfrog \
     && wget -qO - https://releases.jfrog.io/artifactory/api/gpg/key/public | apt-key add - \

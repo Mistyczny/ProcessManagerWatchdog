@@ -25,6 +25,7 @@ target_link_libraries(Watchdog
     WatchdogModuleProto
     ${PROTOBUF_LIBRARY}
     WatchdogServiceProto
+    nlohmann_json::nlohmann_json
 )
 target_include_directories(Watchdog
         PRIVATE
@@ -33,5 +34,5 @@ target_include_directories(Watchdog
     ${CMAKE_BINARY_DIR}/Protocols
 )
 
-install(TARGETS Watchdog DESTINATION /opt/ProcessManager/)
+install(TARGETS Watchdog DESTINATION /opt/ProcessManager)
 install(FILES ${CMAKE_SOURCE_DIR}/Source/src/Watchdog.service DESTINATION /etc/systemd/system)

@@ -1,6 +1,5 @@
 [Unit]
 Description="Process Manager main service"
-After=mongod.service
 
 [Service]
 Type=simple
