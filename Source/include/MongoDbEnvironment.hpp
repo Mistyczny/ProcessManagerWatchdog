@@ -1,4 +1,5 @@
 #pragma once
+#include <fstream>
 #include <memory>
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
@@ -26,12 +27,14 @@ class DbConfigurationReader {
 private:
     DbConfiguration& dbConfiguration;
     const std::string configurationPath{"/opt/ProcessManager/MongoDbConfiguration.json"};
+    std::ifstream configFile;
     nlohmann::json jsonConfig;
 
     bool read();
 
 public:
     DbConfigurationReader(DbConfiguration&);
+    ~DbConfigurationReader();
     bool readConfiguration();
 };
 

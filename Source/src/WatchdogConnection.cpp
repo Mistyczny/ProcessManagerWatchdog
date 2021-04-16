@@ -54,11 +54,11 @@ void ModuleConnection::disconnect() {
         auto record = collection.getModule(this->authenticationData.identifier);
         if (!record.has_value()) {
             Log::critical("No record to update in database");
-        } else if (record->connectionState != Mongo::ConnectionState::Connected) {
+        } else if (record->connectionState != ModuleRecord::ConnectionState::Connected) {
             Log::trace("Disconnected in invalid state");
         } else {
             Log::trace("Set disconnected state in database");
-            record->connectionState = Mongo::ConnectionState::Disconnected;
+            record->connectionState = ModuleRecord::ConnectionState::Disconnected;
             collection.updateModule(std::move(*record));
         }
     }
@@ -124,11 +124,11 @@ void ServiceConnection::disconnect() {
         auto record = collection.getService(this->serviceAuthenticationData.identifier);
         if (!record.has_value()) {
             Log::critical("No record to update in database");
-        } else if (record->connectionState != Mongo::ServiceConnectionState::Connected) {
+        } else if (record->connectionState != ServiceRecord::ConnectionState::Connected) {
             Log::trace("Disconnected in invalid state");
         } else {
             Log::trace("Set disconnected state in database");
-            record->connectionState = Mongo::ServiceConnectionState::Disconnected;
+            record->connectionState = ServiceRecord::ConnectionState::Disconnected;
             collection.updateService(std::move(*record));
         }
     }

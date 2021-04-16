@@ -39,10 +39,10 @@ void ServiceConnectRequestHandler::processConnectRequest() {
         auto serviceRecord = servicesCollection.getService(serviceIdentifier);
         if (!serviceRecord.has_value()) {
             this->connectResponseData.set_responsecode(WatchdogService::ServiceNotExists);
-        } else if (serviceRecord->connectionState == Mongo::ServiceConnectionState::Connected) {
+        } else if (serviceRecord->connectionState == ServiceRecord::ConnectionState::Connected) {
             this->connectResponseData.set_responsecode(WatchdogService::InvalidConnectionState);
         } else {
-            serviceRecord->connectionState = Mongo::ServiceConnectionState::Connected;
+            serviceRecord->connectionState = ServiceRecord::ConnectionState::Connected;
             this->authenticationData.identifier = serviceIdentifier;
             if (this->servicesCollection.updateService(std::move(*serviceRecord))) {
                 this->authenticationData.sequenceCode = this->generateNewSequenceCode();
@@ -102,10 +102,10 @@ void ServiceReconnectRequestHandler::processReconnectRequest() {
         auto serviceRecord = servicesCollection.getService(moduleIdentifier);
         if (!serviceRecord.has_value()) {
             this->reconnectResponseData.set_responsecode(WatchdogService::ServiceNotExists);
-        } else if (serviceRecord->connectionState != Mongo::ServiceConnectionState::Disconnected) {
+        } else if (serviceRecord->connectionState != ServiceRecord::ConnectionState::Disconnected) {
             this->reconnectResponseData.set_responsecode(WatchdogService::InvalidConnectionState);
         } else {
-            serviceRecord->connectionState = Mongo::ServiceConnectionState::Connected;
+            serviceRecord->connectionState = ServiceRecord::ConnectionState::Connected;
             if (servicesCollection.updateService(std::move(*serviceRecord))) {
                 this->authenticationData.sequenceCode = this->generateNewSequenceCode(this->authenticationData.sequenceCode);
                 this->reconnectResponseData.set_sequencecode(this->authenticationData.sequenceCode);
@@ -132,7 +132,7 @@ Communication::Message<WatchdogService::Operation> ServiceShutdownRequestHandler
         if (!serviceRecord.has_value()) {
             throw ServiceRequestHandlerException(ServiceRequestHandlerException::ErrorCode::Dropped);
         } else {
-            serviceRecord->connectionState = Mongo::ServiceConnectionState::Registered;
+            serviceRecord->connectionState = ServiceRecord::ConnectionState::Registered;
             auto moduleUpdated = this->servicesCollection.updateService(std::move(*serviceRecord));
             if (!moduleUpdated) {
                 Log::error("Unable to update module");

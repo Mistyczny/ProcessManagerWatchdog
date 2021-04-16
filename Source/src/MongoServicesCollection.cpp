@@ -38,7 +38,7 @@ std::optional<ServiceRecord> ServicesCollection::viewToServiceRecord(bsoncxx::do
         serviceRecord = std::make_optional<ServiceRecord>();
         serviceRecord->identifier = serviceIdentifier.get_int32();
         int32_t connState = connectionState.get_int32();
-        serviceRecord->connectionState = static_cast<Mongo::ServiceConnectionState>(connState);
+        serviceRecord->connectionState = static_cast<ServiceRecord::ConnectionState>(connState);
         serviceRecord->ipAddress = ipAddress.get_utf8().value.to_string();
     }
     return serviceRecord;
@@ -90,11 +90,11 @@ bool ServicesCollection::markAllConnectedAsDisconnected() {
     bool recordUpdated{false};
     auto result =
         servicesCollection.update_many(document{} // To prevent line move by clang
-                                           << "ConnectionState" << static_cast<int32_t>(ServiceConnectionState::Connected) // To prevent
+                                           << "ConnectionState" << static_cast<int32_t>(ServiceRecord::ConnectionState::Connected) // To prevent
                                            << finalize,               // To prevent line move by clang
                                        document{}                     // To prevent line move by clang
                                            << "$set" << open_document // To prevent line move by clang
-                                           << "ConnectionState" << static_cast<int32_t>(ServiceConnectionState::Disconnected) // To prevent
+                                           << "ConnectionState" << static_cast<int32_t>(ServiceRecord::ConnectionState::Disconnected) // To prevent
                                            << close_document << finalize);
     if (result) {
         recordUpdated = true;

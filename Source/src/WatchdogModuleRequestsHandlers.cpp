@@ -1,6 +1,7 @@
 #include "WatchdogModuleRequestsHandlers.hpp"
 #include "Logging.hpp"
 #include <utility>
+#include "Types.hpp"
 
 namespace Watchdog {
 
@@ -39,11 +40,11 @@ void ModuleConnectRequestHandler::processConnectRequest() {
         auto moduleRecord = modulesCollection.getModule(moduleIdentifier);
         if (!moduleRecord.has_value()) {
             this->connectResponse.set_responsecode(WatchdogModule::ConnectResponseData::ModuleNotExists);
-        } else if (moduleRecord->connectionState == Mongo::ConnectionState::Connected) {
+        } else if (moduleRecord->connectionState == ModuleRecord::ConnectionState::Connected) {
             this->connectResponse.set_responsecode(WatchdogModule::ConnectResponseData::InvalidConnectionState);
         } else {
             Log::info("ModuleConnectRequestHandler::processConnectRequest connected new module");
-            moduleRecord->connectionState = Mongo::ConnectionState::Connected;
+            moduleRecord->connectionState = ModuleRecord::ConnectionState::Connected;
             this->authenticationData.identifier = connectRequest.identifier();
             if (modulesCollection.updateModule(std::move(*moduleRecord))) {
                 this->authenticationData.sequenceCode = this->generateNewSequenceCode();
@@ -103,10 +104,10 @@ void ModuleReconnectRequestHandler::processReconnectRequest() {
         auto moduleRecord = modulesCollection.getModule(moduleIdentifier);
         if (!moduleRecord.has_value()) {
             this->reconnectResponse.set_responsecode(WatchdogModule::ReconnectResponseData::ModuleNotExists);
-        } else if (moduleRecord->connectionState != Mongo::ConnectionState::Disconnected) {
+        } else if (moduleRecord->connectionState != ModuleRecord::ConnectionState::Disconnected) {
             this->reconnectResponse.set_responsecode(WatchdogModule::ReconnectResponseData::InvalidConnectionState);
         } else {
-            moduleRecord->connectionState = Mongo::ConnectionState::Connected;
+            moduleRecord->connectionState = ModuleRecord::ConnectionState::Connected;
             if (modulesCollection.updateModule(std::move(*moduleRecord))) {
                 this->authenticationData.sequenceCode = this->generateNewSequenceCode(this->authenticationData.sequenceCode);
                 this->reconnectResponse.set_sequencecode(this->authenticationData.sequenceCode);
@@ -139,7 +140,7 @@ void ModuleShutdownRequestHandler::processShutdownRequest() {
         if (!moduleRecord.has_value()) {
             throw ModuleRequestHandlerException(ModuleRequestHandlerException::ErrorCode::Dropped);
         } else {
-            moduleRecord->connectionState = Mongo::ConnectionState::Registered;
+            moduleRecord->connectionState = ModuleRecord::ConnectionState::Registered;
             auto moduleUpdated = this->modulesCollection.updateModule(std::move(*moduleRecord));
             if (!moduleUpdated) {
                 Log::error("Unable to update module");

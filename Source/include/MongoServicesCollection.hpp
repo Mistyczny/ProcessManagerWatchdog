@@ -6,34 +6,6 @@
 
 namespace Mongo {
 
-enum class ServiceConnectionState : int32_t { Registered, Connected, Disconnected };
-
-struct ServiceRecord {
-    uint16_t port;
-    Types::ServiceIdentifier identifier;
-    ServiceConnectionState connectionState;
-    std::string ipAddress;
-
-    [[nodiscard]] std::string connectionStateToString() const {
-        std::string stateAsString{};
-        switch (connectionState) {
-        case ServiceConnectionState::Registered:
-            stateAsString = "Registered";
-            break;
-        case ServiceConnectionState::Connected:
-            stateAsString = "Connected";
-            break;
-        case ServiceConnectionState::Disconnected:
-            stateAsString = "Disconnected";
-            break;
-        default:
-            stateAsString = "Error";
-            break;
-        }
-        return stateAsString;
-    }
-};
-
 class ServicesCollection {
 private:
     mongocxx::collection servicesCollection;

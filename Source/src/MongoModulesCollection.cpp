@@ -58,7 +58,7 @@ bool ModulesCollection::setAllAsRegistered() {
                                                     << close_document << finalize,                  // To prevent line move by clang
                                                 document{}                                          // To prevent line move by clang
                                                     << "$set" << open_document                      // To prevent line move by clang
-                                                    << "ConnectionState" << static_cast<int32_t>(Mongo::ConnectionState::Registered)
+                                                    << "ConnectionState" << static_cast<int32_t>(ModuleRecord::ConnectionState::Registered)
                                                     << close_document << finalize);
     if (result) {
         allSetAsRegistered = true;
@@ -74,7 +74,7 @@ bool ModulesCollection::setDisconnected(Types::ModuleIdentifier& moduleIdentifie
                                          << finalize,                              // To prevent line move by clang
                                      document{}                                    // To prevent line move by clang
                                          << "$set" << open_document                // To prevent line move by clang
-                                         << "ConnectionState" << static_cast<int32_t>(Mongo::ConnectionState::Disconnected) // Prevent
+                                         << "ConnectionState" << static_cast<int32_t>(ModuleRecord::ConnectionState::Disconnected) // Prevent
                                          << close_document << finalize);
 
     if (result) {
@@ -102,7 +102,7 @@ std::optional<ModuleRecord> ModulesCollection::viewToModuleRecord(bsoncxx::docum
         moduleRecord = std::make_optional<ModuleRecord>();
         moduleRecord->identifier = modIdentifier.get_int32();
         int32_t connState = connectionState.get_int32();
-        moduleRecord->connectionState = static_cast<Mongo::ConnectionState>(connState);
+        moduleRecord->connectionState = static_cast<ModuleRecord::ConnectionState>(connState);
         moduleRecord->ipAddress = ipAddress.get_utf8().value.to_string();
         moduleRecord->port = port.get_int32();
     }
@@ -169,11 +169,11 @@ bool ModulesCollection::markAllConnectedAsDisconnected() {
     bool recordUpdated{false};
     auto result =
         modulesCollection.update_many(document{} // To prevent line move by clang
-                                          << "ConnectionState" << static_cast<int32_t>(ConnectionState::Connected) // To prevent
+                                          << "ConnectionState" << static_cast<int32_t>(ModuleRecord::ConnectionState::Connected) // To prevent
                                           << finalize,               // To prevent line move by clang
                                       document{}                     // To prevent line move by clang
                                           << "$set" << open_document // To prevent line move by clang
-                                          << "ConnectionState" << static_cast<int32_t>(ConnectionState::Disconnected) // To prevent
+                                          << "ConnectionState" << static_cast<int32_t>(ModuleRecord::ConnectionState::Disconnected) // To prevent
                                           << close_document << finalize);
     if (result) {
         recordUpdated = true;

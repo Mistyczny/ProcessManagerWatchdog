@@ -30,4 +30,15 @@ union IdentifierUnion {
     return identifierUnion.identifier;
 }
 
+template <typename T> struct ProgramRecord {
+    enum class ConnectionState : int32_t { Registered, Connected, Disconnected };
+    uint16_t port{};
+    T identifier{};
+    ConnectionState connectionState{};
+    std::string ipAddress{};
+};
+
 } // namespace Types
+
+typedef Types::ProgramRecord<Types::ModuleIdentifier> ModuleRecord;
+typedef Types::ProgramRecord<Types::ServiceIdentifier> ServiceRecord;

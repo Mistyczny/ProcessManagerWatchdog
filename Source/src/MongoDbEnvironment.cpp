@@ -1,6 +1,5 @@
 #include "MongoDbEnvironment.hpp"
 #include "Logging.hpp"
-#include <fstream>
 #include <iostream>
 
 namespace Mongo {
@@ -9,15 +8,21 @@ using bsoncxx::builder::basic::array;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
-DbConfigurationReader::DbConfigurationReader(DbConfiguration& dbConfiguration) : dbConfiguration{dbConfiguration} {}
+DbConfigurationReader::DbConfigurationReader(DbConfiguration& dbConfiguration) : dbConfiguration{dbConfiguration} {
+    configFile.open(configurationPath);
+}
+
+DbConfigurationReader::~DbConfigurationReader() {
+    if (configFile.is_open()) {
+        configFile.close();
+    }
+}
 
 bool DbConfigurationReader::readConfiguration() {
     bool readConfiguration{false};
-    std::string configFile{configurationPath};
-    std::ifstream ifs(configFile);
-    if (ifs.is_open()) {
+    if (configFile.is_open()) {
         try {
-            jsonConfig = nlohmann::json::parse(ifs);
+            jsonConfig = nlohmann::json::parse(configFile);
             readConfiguration = this->read();
         } catch (nlohmann::json::exception& ex) {
             readConfiguration = false;
